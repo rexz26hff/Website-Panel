@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Panel Admin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #0f0f0f;
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #loginSection, #panelSection {
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      background: #1f1f1f;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+      display: none;
+    }
+
+    #loginSection.active, #panelSection.active {
+      display: block;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #ff00ff;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a2a;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #8f00ff;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #b000ff;
+    }
+
+    .logout-btn {
+      margin-top: 15px;
+      background: #ff004c;
+    }
+
+    .welcome {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    @media screen and (max-height: 500px) {
+      body {
+        align-items: flex-start;
+        padding-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Section -->
+  <div id="loginSection" class="active">
+    <h2>Login Panel</h2>
+    <input type="text" id="loginUser" placeholder="Username" />
+    <input type="password" id="loginPass" placeholder="Password" />
+    <button onclick="handleLogin()">Login</button>
+  </div>
+
+  <!-- Panel Section -->
+  <div id="panelSection">
+    <h2>Rx Panel</h2>
+    <p class="welcome">Selamat datang, <span id="userName"></span>!</p>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    function showPanel() {
+      document.getElementById("loginSection").classList.remove("active");
+      document.getElementById("panelSection").classList.add("active");
+      const user = localStorage.getItem("username") || "User";
+      document.getElementById("userName").innerText = user;
+    }
+
+    async function handleLogin() {
+      const user = document.getElementById("loginUser").value.trim();
+      const pass = document.getElementById("loginPass").value.trim();
+
+      try {
+        const res = await fetch("https://raw.githubusercontent.com/rexz26hff/Website-protofilio-kelas-/main/logindata.json");
+        const data = await res.json();
+
+        const match = data.find(u => u.username === user && u.password === pass);
+        
+        if (match) {
+          localStorage.setItem("loggedIn", true);
+          localStorage.setItem("username", user);
+          showPanel();
+        } else {
+          alert("Login gagal. Username atau password salah.");
+        }
+
+      } catch (err) {
+        alert("Gagal mengambil data dari GitHub.");
+        console.error(err);
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      document.getElementById("panelSection").classList.remove("active");
+      document.getElementById("loginSection").classList.add("active");
+    }
+
+    // Auto-login jika sudah login sebelumnya
+    window.onload = () => {
+      if (localStorage.getItem("loggedIn")) {
+        showPanel();
+      } else {
+        document.getElementById("loginSection").classList.add("active");
+      }
+    };
+  </script>
+  <fother>® Credit From Rexz</fother>
+</body>
+</html>
