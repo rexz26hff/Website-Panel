@@ -1,154 +1,124 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rx Panel Creator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website Admin Panel</title>
   <style>
     body {
-      background: linear-gradient(135deg, #1a001a, #330033);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box, .form-box {
+      background: #1e293b;
       padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      width: 300px;
     }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #8f00ff90;
-    }
-
-    h1 {
-      text-align: center;
-      color: #d499ff;
-      margin-bottom: 20px;
-    }
-
     input, select {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 5px;
-      background: #1a001a;
-      color: white;
-      border: 1px solid #8f00ff;
-    }
-
-    button {
-      background: #9a00ff;
-      color: white;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    button:hover {
-      background: #b14dff;
-    }
-
-    #logoutBtn {
-      background: #ff0077;
       margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #334155;
+      color: white;
     }
-
-    #result {
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background: #4f46e5;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    pre {
       white-space: pre-wrap;
-      margin-top: 20px;
-      background: #1a001a;
-      padding: 15px;
-      border-radius: 10px;
-      border: 1px solid #8f00ff;
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <div class="container" id="loginBox">
-    <h1>🔐 Login Admin</h1>
-    <input type="text" id="loginUser" placeholder="Username" />
-    <input type="password" id="loginPass" placeholder="Password" />
-    <button onclick="login()">Login</button>
-  </div>
 
-  <div class="container" id="panelBox" style="display: none;">
-    <h1>🌐 Rx Panel Creator</h1>
+<div class="login-box" id="loginBox">
+  <h2>Login Admin</h2>
+  <input type="text" id="username" placeholder="Username" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <p id="loginMsg"></p>
+</div>
 
-    <label>Pilih Plan:</label>
-    <select id="plan">
-      <option value="1gb">1GB</option>
-      <option value="2gb">2GB</option>
-      <option value="5gb">5GB</option>
-      <option value="unlimited">Unlimited</option>
-    </select>
+<div class="form-box" id="formBox" style="display:none;">
+  <h2>Create Server</h2>
+  <input type="text" id="plta" placeholder="PLTA" required />
+  <select id="plan">
+    <option value="1gb">1GB</option>
+    <option value="10gb">10GB</option>
+    <option value="unlimited">Unlimited</option>
+  </select>
+  <input type="text" id="domain" placeholder="Domain" required />
+  <button onclick="submitForm()">Submit</button>
+  <pre id="responseBox"></pre>
+</div>
 
-    <input type="text" id="domain" placeholder="contoh: panel.rexz.my.id" />
-    <input type="text" id="plta" placeholder="PLTA API Key" />
-    <input type="text" id="egg" placeholder="Egg ID" />
-    <input type="text" id="nestid" placeholder="Nest ID" />
-    <input type="text" id="loc" placeholder="Lokasi server (cth: ID1, SG2)" />
-    <input type="text" id="username" placeholder="Username panel" />
-    
-    <button onclick="createServer()">🚀 Buat Server Panel</button>
-    <button id="logoutBtn" onclick="logout()">Logout</button>
+<script>
+  const loginBox = document.getElementById('loginBox');
+  const formBox = document.getElementById('formBox');
+  const loginMsg = document.getElementById('loginMsg');
 
-    <div id="result"></div>
-  </div>
+  async function login() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
 
-  <script>
-    // Cek login saat halaman dibuka
-    if (localStorage.getItem("isLoggedIn") === "true") {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("panelBox").style.display = "block";
-    }
+    try {
+      const res = await fetch("https://raw.githubusercontent.com/rexz26hff/Website-protofilio-kelas-/main/logindata.json");
+      const data = await res.json();
+      const match = data.find(u => u.username === user && u.password === pass);
 
-    function login() {
-      const user = document.getElementById("loginUser").value.trim();
-      const pass = document.getElementById("loginPass").value.trim();
-
-      if (user === "rexz" && pass === "admin123") {
-        localStorage.setItem("isLoggedIn", "true");
-        alert("Login berhasil!");
-        location.reload();
+      if (match) {
+        loginBox.style.display = "none";
+        formBox.style.display = "block";
       } else {
-        alert("Login gagal. Username atau password salah.");
+        loginMsg.textContent = "Username atau password salah!";
       }
+    } catch (e) {
+      loginMsg.textContent = "Gagal memverifikasi!";
     }
+  }
 
-    function logout() {
-      localStorage.removeItem("isLoggedIn");
-      alert("Berhasil logout.");
-      location.reload();
+  async function submitForm() {
+    const plan = document.getElementById("plan").value;
+    const plta = document.getElementById("plta").value;
+    const domain = document.getElementById("domain").value;
+    const username = document.getElementById("username").value;
+
+    const egg = 15;
+    const nestid = 5;
+    const loc = 1;
+
+    const url = `https://api.fandirr.my.id/panel/create-server?plan=${plan}&domain=${domain}&plta=${plta}&egg=${egg}&nestid=${nestid}&loc=${loc}&username=${username}`;
+
+    try {
+      const res = await fetch(url);
+      const result = await res.json();
+      document.getElementById("responseBox").textContent = JSON.stringify(result, null, 2);
+    } catch (e) {
+      document.getElementById("responseBox").textContent = "Gagal mengirim request!";
     }
+  }
+</script>
 
-    async function createServer() {
-      const plan = document.getElementById('plan').value;
-      const domain = document.getElementById('domain').value.trim();
-      const plta = document.getElementById('plta').value.trim();
-      const egg = document.getElementById('egg').value.trim();
-      const nestid = document.getElementById('nestid').value.trim();
-      const loc = document.getElementById('loc').value.trim();
-      const username = document.getElementById('username').value.trim();
-
-      if (!domain || !plta || !egg || !nestid || !loc || !username) {
-        return alert('⚠️ Semua field wajib diisi!');
-      }
-
-      document.getElementById('result').innerText = '⏳ Memproses...';
-
-      try {
-        const res = await fetch(`https://api.fandirr.my.id/panel/create-server?plan=${plan}&domain=${encodeURIComponent(domain)}&plta=${plta}&egg=${egg}&nestid=${nestid}&loc=${loc}&username=${username}`);
-        const data = await res.json();
-        document.getElementById('result').innerText = JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById('result').innerText = '❌ Gagal: ' + err;
-      }
-    }
-  </script>
 </body>
 </html>
