@@ -3,173 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Web Panel Admin</title>
+  <title>Rx Panel API</title>
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
       font-family: 'Segoe UI', sans-serif;
-      background: #0f001a;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a001a, #330033, #4d004d);
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid #8f00ff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 0 20px #8f00ff80;
+      animation: fadeIn 1s ease-in;
     }
 
     h1 {
-      margin-top: 30px;
-      color: #b300ff;
-      text-shadow: 0 0 5px #ff00ff;
+      text-align: center;
+      margin-bottom: 25px;
+      color: #d499ff;
     }
 
-    .login, .panel {
-      margin-top: 20px;
-      padding: 20px;
-      background: #1a0033;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #8f00ff;
-      width: 90%;
-      max-width: 400px;
+    label {
+      display: block;
+      margin-top: 15px;
+      color: #ccc;
     }
 
-    input, select, button {
+    input, select {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin-top: 5px;
       border: none;
-      border-radius: 8px;
-      background: #33004d;
+      border-radius: 5px;
+      background: #1a001a;
       color: #fff;
+      border: 1px solid #8f00ff;
     }
 
     button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
       background: #8f00ff;
-      font-weight: bold;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      font-weight: bold;
+      transition: background 0.3s;
     }
 
     button:hover {
-      background: #b300ff;
+      background: #a54dfc;
     }
 
-    pre {
-      margin-top: 15px;
-      background: #140022;
-      padding: 10px;
-      border-radius: 10px;
+    #result {
+      margin-top: 30px;
       white-space: pre-wrap;
-      color: #adfffc;
+      background: #1a001a;
+      padding: 20px;
+      border: 1px solid #8f00ff;
+      border-radius: 10px;
+      color: #d1b3ff;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-
-  <h1>Rx Panel Creator</h1>
-
-  <div class="login" id="login">
-    <h3>Login Admin</h3>
-    <input type="text" id="user" placeholder="Username">
-    <input type="password" id="pass" placeholder="Password">
-    <button onclick="login()">Login</button>
-  </div>
-
-  <div class="panel" id="panel" style="display:none;">
-    <h3>Create Server Panel</h3>
+  <div class="container">
+    <h1>🌐 Rx Panel Creator</h1>
+    <label for="plan">Pilih Plan:</label>
     <select id="plan">
       <option value="1gb">1GB</option>
       <option value="2gb">2GB</option>
       <option value="3gb">3GB</option>
-      <option value="4gb">4GB</option>
       <option value="5gb">5GB</option>
-      <option value="6gb">6GB</option>
-      <option value="7gb">7GB</option>
-      <option value="8gb">8GB</option>
-      <option value="9gb">9GB</option>
       <option value="10gb">10GB</option>
       <option value="unlimited">Unlimited</option>
     </select>
-    <input type="text" id="domain" placeholder="Domain">
-    <input type="text" id="ptla" placeholder="PTLA">
-    <input type="text" id="ptlc" placeholder="PTLC">
-    <input type="text" id="usernamePanel" placeholder="Username Panel">
-    <button onclick="createPanel()">Create Panel</button>
-    <pre id="result"></pre>
+
+    <label for="domain">Domain:</label>
+    <input type="text" id="domain" placeholder="contoh: panel.rexz.my.id" />
+
+    <label for="plta">PLTA Key:</label>
+    <input type="text" id="plta" placeholder="PLTA API Key" />
+
+    <label for="egg">Egg ID:</label>
+    <input type="text" id="egg" placeholder="Egg ID" />
+
+    <label for="nestid">Nest ID:</label>
+    <input type="text" id="nestid" placeholder="Nest ID" />
+
+    <label for="loc">Lokasi:</label>
+    <input type="text" id="loc" placeholder="Lokasi server (cth: ID1, SG2)" />
+
+    <label for="username">Username:</label>
+    <input type="text" id="username" placeholder="Username panel" />
+
+    <button onclick="createServer()">🚀 Buat Server Panel</button>
+
+    <div id="result"></div>
   </div>
 
   <script>
-    async function login() {
-      const user = document.getElementById("user").value.trim();
-      const pass = document.getElementById("pass").value.trim();
-      const loginDiv = document.getElementById("login");
-      const panelDiv = document.getElementById("panel");
+    async function createServer() {
+      const plan = document.getElementById('plan').value;
+      const domain = document.getElementById('domain').value.trim();
+      const plta = document.getElementById('plta').value.trim();
+      const egg = document.getElementById('egg').value.trim();
+      const nestid = document.getElementById('nestid').value.trim();
+      const loc = document.getElementById('loc').value.trim();
+      const username = document.getElementById('username').value.trim();
+
+      if (!domain || !plta || !egg || !nestid || !loc || !username) {
+        return alert('⚠️ Semua field wajib diisi!');
+      }
+
+      document.getElementById('result').innerText = '⏳ Memproses...';
 
       try {
-        const res = await fetch("https://raw.githubusercontent.com/rexz26hff/Website-protofilio-kelas-/main/logindata.json");
-        const data = await res.json();
-        const found = data.find(u => u.username === user && u.password === pass);
-        if (found) {
-          alert("Login berhasil!");
-          loginDiv.style.display = "none";
-          panelDiv.style.display = "block";
-        } else {
-          alert("Login gagal! Periksa kembali username dan password.");
-        }
-      } catch (e) {
-        alert("Gagal memuat data login.");
-      }
-    }
+        const response = await fetch(`https://api.fandirr.my.id/panel/create-server?plan=${plan}&domain=${encodeURIComponent(domain)}&plta=${plta}&egg=${egg}&nestid=${nestid}&loc=${loc}&username=${username}`);
+        const data = await response.json();
 
-    function getAutoValues(plan) {
-      let egg = "1", nestid = "1", loc = "1";
-      switch(plan) {
-        case "1gb":
-        case "2gb":
-        case "3gb":
-        case "4gb":
-        case "5gb":
-        case "6gb":
-        case "7gb":
-        case "8gb":
-        case "9gb":
-        case "10gb":
-        case "unlimited":
-          egg = "24";
-          nestid = "3";
-          loc = "1";
-          break;
-      }
-      return { egg, nestid, loc };
-    }
-
-    async function createPanel() {
-      const plan = document.getElementById("plan").value;
-      const domain = document.getElementById("domain").value;
-      const ptla = document.getElementById("ptla").value;
-      const ptlc = document.getElementById("ptlc").value;
-      const username = document.getElementById("usernamePanel").value;
-      const { egg, nestid, loc } = getAutoValues(plan);
-
-      const payload = {
-        plan, domain, ptla, ptlc, egg, nestid, loc, username
-      };
-
-      const resultBox = document.getElementById("result");
-      resultBox.innerText = "Processing...";
-
-      try {
-        const res = await fetch("https://api.fandirr.my.id/panel/create-server", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await res.json();
-        resultBox.innerText = JSON.stringify(result, null, 2);
-      } catch (e) {
-        resultBox.innerText = "Gagal membuat panel!";
+        document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('result').innerText = `❌ Gagal menghubungi API:\n${error}`;
       }
     }
   </script>
