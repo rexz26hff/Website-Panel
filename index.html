@@ -1,153 +1,177 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Website Panel Admin</title>
+  <title>Rx Panel Creator</title>
   <style>
-    * {
+    body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
       font-family: 'Segoe UI', sans-serif;
-    }
-
-    body {
-      background: #0f0f0f;
-      color: white;
-      height: 100vh;
+      background: #0f001a;
+      color: #fff;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      min-height: 100vh;
     }
 
-    #loginSection, #panelSection {
+    h1 {
+      margin-top: 30px;
+      color: #b300ff;
+      text-shadow: 0 0 5px #ff00ff;
+    }
+
+    .login, .panel {
+      margin-top: 20px;
+      padding: 20px;
+      background: #1a0033;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #8f00ff;
       width: 90%;
       max-width: 400px;
-      padding: 30px;
-      background: #1f1f1f;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
-      display: none;
     }
 
-    #loginSection.active, #panelSection.active {
-      display: block;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #ff00ff;
-    }
-
-    input {
+    input, select, button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin: 10px 0;
       border: none;
       border-radius: 8px;
-      background: #2a2a2a;
-      color: white;
-      font-size: 16px;
+      background: #33004d;
+      color: #fff;
     }
 
     button {
-      width: 100%;
-      padding: 12px;
       background: #8f00ff;
-      color: white;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background: #b000ff;
+      background: #b300ff;
     }
 
-    .logout-btn {
+    pre {
       margin-top: 15px;
-      background: #ff004c;
-    }
-
-    .welcome {
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    @media screen and (max-height: 500px) {
-      body {
-        align-items: flex-start;
-        padding-top: 20px;
-      }
+      background: #140022;
+      padding: 10px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      color: #adfffc;
     }
   </style>
 </head>
 <body>
-  <!-- Login Section -->
-  <div id="loginSection" class="active">
-    <h2>Login Panel</h2>
-    <input type="text" id="loginUser" placeholder="Username" />
-    <input type="password" id="loginPass" placeholder="Password" />
-    <button onclick="handleLogin()">Login</button>
+
+  <h1>Rx Panel Creator</h1>
+
+  <div class="login" id="login">
+    <h3>Login Admin</h3>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="login()">Login</button>
   </div>
 
-  <!-- Panel Section -->
-  <div id="panelSection">
-    <h2>Rx Panel</h2>
-    <p class="welcome">Selamat datang, <span id="userName"></span>!</p>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+  <div class="panel" id="panel" style="display:none;">
+    <h3>Create Server Panel</h3>
+    <select id="plan">
+      <option value="1gb">1GB</option>
+      <option value="2gb">2GB</option>
+      <option value="3gb">3GB</option>
+      <option value="4gb">4GB</option>
+      <option value="5gb">5GB</option>
+      <option value="6gb">6GB</option>
+      <option value="7gb">7GB</option>
+      <option value="8gb">8GB</option>
+      <option value="9gb">9GB</option>
+      <option value="10gb">10GB</option>
+      <option value="unlimited">Unlimited</option>
+    </select>
+    <input type="text" id="domain" placeholder="Domain">
+    <input type="text" id="ptla" placeholder="PTLA">
+    <input type="text" id="ptlc" placeholder="PTLC">
+    <input type="text" id="usernamePanel" placeholder="Username Panel">
+    <button onclick="createPanel()">Create Panel</button>
+    <pre id="result"></pre>
   </div>
 
   <script>
-    function showPanel() {
-      document.getElementById("loginSection").classList.remove("active");
-      document.getElementById("panelSection").classList.add("active");
-      const user = localStorage.getItem("username") || "User";
-      document.getElementById("userName").innerText = user;
-    }
-
-    async function handleLogin() {
-      const user = document.getElementById("loginUser").value.trim();
-      const pass = document.getElementById("loginPass").value.trim();
+    async function login() {
+      const user = document.getElementById("user").value.trim();
+      const pass = document.getElementById("pass").value.trim();
+      const loginDiv = document.getElementById("login");
+      const panelDiv = document.getElementById("panel");
 
       try {
         const res = await fetch("https://raw.githubusercontent.com/rexz26hff/Website-protofilio-kelas-/main/logindata.json");
         const data = await res.json();
-
-        const match = data.find(u => u.username === user && u.password === pass);
-        
-        if (match) {
-          localStorage.setItem("loggedIn", true);
-          localStorage.setItem("username", user);
-          showPanel();
+        const found = data.find(u => u.username === user && u.password === pass);
+        if (found) {
+          alert("Login berhasil!");
+          loginDiv.style.display = "none";
+          panelDiv.style.display = "block";
         } else {
-          alert("Login gagal. Username atau password salah.");
+          alert("Login gagal! Periksa kembali username dan password.");
         }
-
-      } catch (err) {
-        alert("Gagal mengambil data dari GitHub.");
-        console.error(err);
+      } catch (e) {
+        alert("Gagal memuat data login.");
       }
     }
 
-    function logout() {
-      localStorage.clear();
-      document.getElementById("panelSection").classList.remove("active");
-      document.getElementById("loginSection").classList.add("active");
+    function getAutoValues(plan) {
+      let egg = "1", nestid = "1", loc = "1";
+      switch(plan) {
+        case "1gb":
+        case "2gb":
+        case "3gb":
+        case "4gb":
+        case "5gb":
+        case "6gb":
+        case "7gb":
+        case "8gb":
+        case "9gb":
+        case "10gb":
+        case "unlimited":
+          egg = "24";
+          nestid = "3";
+          loc = "1";
+          break;
+      }
+      return { egg, nestid, loc };
     }
 
-    // Auto-login jika sudah login sebelumnya
-    window.onload = () => {
-      if (localStorage.getItem("loggedIn")) {
-        showPanel();
-      } else {
-        document.getElementById("loginSection").classList.add("active");
+    async function createPanel() {
+      const plan = document.getElementById("plan").value;
+      const domain = document.getElementById("domain").value;
+      const ptla = document.getElementById("ptla").value;
+      const ptlc = document.getElementById("ptlc").value;
+      const username = document.getElementById("usernamePanel").value;
+      const { egg, nestid, loc } = getAutoValues(plan);
+
+      const payload = {
+        plan, domain, ptla, ptlc, egg, nestid, loc, username
+      };
+
+      const resultBox = document.getElementById("result");
+      resultBox.innerText = "Processing...";
+
+      try {
+        const res = await fetch("https://api.fandirr.my.id/panel/create-server", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        resultBox.innerText = JSON.stringify(result, null, 2);
+      } catch (e) {
+        resultBox.innerText = "Gagal membuat panel!";
       }
-    };
+    }
   </script>
 </body>
 </html>
