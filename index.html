@@ -3,154 +3,168 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel Creator</title>
+  <title>Website Panel Admin</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0e0e0e;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #2b003a, #8F00FF);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: all 0.4s ease-in-out;
     }
     .container {
-      background: #1e1e1e;
-      padding: 25px;
+      background: #1e0030;
+      padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
-      width: 95%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      width: 90%;
       max-width: 400px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    h2 {
       text-align: center;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
     }
     input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
+      background: #320048;
+      color: white;
     }
     button {
-      margin-top: 15px;
-      padding: 10px;
-      width: 100%;
-      background-color: #8f00ff;
+      background-color: #8F00FF;
       color: white;
-      border: none;
-      font-weight: bold;
-      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s;
     }
-    button:hover {
-      background-color: #a64dff;
+    .hidden { display: none; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .hidden {
-      display: none;
+    .logout {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      background: crimson;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
     }
-    pre {
-      text-align: left;
-      background: #2a2a2a;
-      padding: 15px;
+    .response-box {
+      background: #28003f;
+      padding: 10px;
       border-radius: 10px;
-      overflow-x: auto;
       margin-top: 15px;
+      white-space: pre-wrap;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="loginBox">
-      <h2>Login Panel</h2>
-      <input type="text" id="username" placeholder="Username" />
-      <input type="password" id="password" placeholder="Password" />
-      <button onclick="login()">Login</button>
-      <p id="loginStatus"></p>
-    </div>
+  <div class="container" id="loginForm">
+    <h2>Login Panel</h2>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+  </div>
 
-    <div id="formBox" class="hidden">
-      <h2>Create Server</h2>
-      <select id="plan">
-        <option value="1gb">1GB</option>
-        <option value="2gb">2GB</option>
-        <option value="3gb">3GB</option>
-        <option value="4gb">4GB</option>
-        <option value="5gb">5GB</option>
-        <option value="6gb">6GB</option>
-        <option value="7gb">7GB</option>
-        <option value="8gb">8GB</option>
-        <option value="9gb">9GB</option>
-        <option value="10gb">10GB</option>
-        <option value="unlimited">Unlimited</option>
-      </select>
-      <input type="text" id="ptla" placeholder="PTLA" />
-      <input type="text" id="ptlc" placeholder="PTLC" />
-      <input type="text" id="domain" placeholder="Domain" />
-      <button onclick="createServer()">Create</button>
-      <pre id="resultBox" class="hidden"></pre>
-    </div>
+  <div class="container hidden" id="panelForm">
+    <h2>Create Panel</h2>
+    <input type="text" id="ptla" placeholder="PTLA" />
+    <input type="text" id="ptlc" placeholder="PTLC" />
+    <input type="text" id="domain" placeholder="Domain" />
+    <input type="text" id="userpanel" placeholder="Username Panel" />
+    <select id="plan">
+      <option value="1gb">1 GB</option>
+      <option value="2gb">2 GB</option>
+      <option value="3gb">3 GB</option>
+      <option value="4gb">4 GB</option>
+      <option value="5gb">5 GB</option>
+      <option value="6gb">6 GB</option>
+      <option value="7gb">7 GB</option>
+      <option value="8gb">8 GB</option>
+      <option value="9gb">9 GB</option>
+      <option value="10gb">10 GB</option>
+      <option value="unlimited">UNLIMITED</option>
+    </select>
+    <button onclick="createPanel()">Create Server</button>
+    <button>
+    <div card="logout" onclick="logout()">Logout</div>
+    </button>
+    <div class="response-box" id="result"></div>
   </div>
 
   <script>
-    const GITHUB_URL = "https://raw.githubusercontent.com/rexz26hff/Website-protofilio-kelas-/main/logindata.json"; // ganti sesuai repo kamu
+    const rawLoginURL = "https://raw.githubusercontent.com/rexz26hff/Website-protofilio-kelas-/main/logindata.json";
 
     async function login() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
-      const status = document.getElementById("loginStatus");
-
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
       try {
-        const res = await fetch(GITHUB_URL);
+        const res = await fetch(rawLoginURL);
         const data = await res.json();
-
-        const match = data.find(u => u.username === user && u.password === pass);
+        const match = data.find(item => item.username === user && item.password === pass);
         if (match) {
-          document.getElementById("loginBox").classList.add("hidden");
-          document.getElementById("formBox").classList.remove("hidden");
+          localStorage.setItem("loggedIn", "true");
+          document.getElementById("loginForm").classList.add("hidden");
+          document.getElementById("panelForm").classList.remove("hidden");
         } else {
-          status.innerText = "Invalid username or password.";
+          alert("Login gagal! Username atau password salah.");
         }
       } catch (err) {
-        status.innerText = "Login error: " + err.message;
+        alert("Login error: " + err.message);
       }
     }
 
-    async function createServer() {
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      document.getElementById("loginForm").classList.remove("hidden");
+      document.getElementById("panelForm").classList.add("hidden");
+    }
+
+    async function createPanel() {
+      const ptla = document.getElementById("ptla").value;
+      const ptlc = document.getElementById("ptlc").value;
+      const domain = document.getElementById("domain").value;
+      const username = document.getElementById("userpanel").value;
       const plan = document.getElementById("plan").value;
-      const ptla = document.getElementById("ptla").value.trim();
-      const ptlc = document.getElementById("ptlc").value.trim();
-      const domain = document.getElementById("domain").value.trim();
-      const resultBox = document.getElementById("resultBox");
+      const egg = 15, nestid = 5, loc = 1;
 
-      if (!ptla || !ptlc || !domain) {
-        alert("Semua field wajib diisi!");
-        return;
-      }
-
-      const params = new URLSearchParams({
-        plan,
-        ptla,
-        plta: ptla,
-        ptlc,
-        domain,
-        egg: "15",
-        nestid: "5",
-        loc: "1",
-        username: "admin"
-      });
-
-      const apiUrl = "https://api.fandirr.my.id/panel/create-server?" + params.toString();
+      if (!ptla || !ptlc || !domain || !username) return alert("Isi semua field!");
+      const body = { ptla, ptlc, domain, username, plan, egg, nestid, loc };
 
       try {
-        const res = await fetch(apiUrl);
-        const json = await res.json();
-        resultBox.classList.remove("hidden");
-        resultBox.innerText = JSON.stringify(json, null, 2);
+        const res = await fetch("https://api.fandirr.my.id/panel/create-server", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        document.getElementById("result").textContent = JSON.stringify(result, null, 2);
       } catch (e) {
-        resultBox.classList.remove("hidden");
-        resultBox.innerText = "Error fetching server: " + e.message;
+        document.getElementById("result").textContent = "Gagal membuat panel: " + e.message;
+      }
+    }
+
+    // Auto login jika sudah login
+    window.onload = () => {
+      if (localStorage.getItem("loggedIn") === "true") {
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("panelForm").classList.remove("hidden");
       }
     }
   </script>
